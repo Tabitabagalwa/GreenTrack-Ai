@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "framework": "angular",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.mjs"
+    }
+  ]
+}
