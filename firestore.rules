@@ -1,0 +1,78 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // Collection: users
+    // Fields: uid, displayName, email, photoURL, points, level, badges, createdAt
+    //
+    // Collection: reports
+    // Fields: reporterId, reporterName, imageUrl, location (lat, lng), category, description, status, pointsAwarded, timestamp
+    //
+    // Collection: collectionPoints
+    // Fields: name, location (lat, lng), typesAccepted, address
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'displayName', 'email', 'points', 'level']) &&
+             data.uid == request.auth.uid &&
+             data.displayName is string && data.displayName.size() < 100 &&
+             isValidEmail(data.email) &&
+             data.points is number &&
+             data.level is number;
+    }
+
+    function isValidReport(data) {
+      return data.keys().hasAll(['reporterId', 'imageUrl', 'location', 'category', 'status', 'timestamp']) &&
+             data.reporterId == request.auth.uid &&
+             data.imageUrl is string && data.imageUrl.size() < 2000 &&
+             data.category in ['plastic', 'organic', 'metal', 'paper', 'e-waste', 'other'] &&
+             data.status in ['pending', 'verified', 'cleaned'];
+    }
+
+    // Rules
+    
+    match /users/{userId} {
+      // Users can only read their own profile (contains email)
+      allow read: if isOwner(userId);
+      // Users can create/update their own profile
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data) && 
+                    request.resource.data.points == resource.data.points; // Points handled by admin/system logic if needed, but for now owner can't self-award
+    }
+    
+    match /reports/{reportId} {
+      // Reports are public for mapping
+      allow read: if isAuthenticated();
+      // Authenticated users can create reports
+      allow create: if isAuthenticated() && isValidReport(request.resource.data);
+      // Only owner can update their report (e.g. description)
+      allow update: if isAuthenticated() && resource.data.reporterId == request.auth.uid && 
+                    isValidReport(request.resource.data) &&
+                    request.resource.data.status == resource.data.status; // Can't self-verify/clean
+      // Admins (to be implemented) or system would update status
+    }
+    
+    match /collectionPoints/{pointId} {
+      // Collection points are public
+      allow read: if true;
+      // Only admins can write (for now, deny all writes)
+      allow write: if false;
+    }
+  }
+}

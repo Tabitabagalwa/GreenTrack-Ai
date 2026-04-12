@@ -1,0 +1,5 @@
+{
+  "name": "GreenTrack AI",
+  "description": "Smart waste management platform using AI to classify waste, map hotspots, and gamify environmental action.",
+  "requestFramePermissions": ["camera", "geolocation"]
+}
