@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { GoogleGenAI, Type } from "@google/genai";
 import { 
   collection, 
   addDoc, 
@@ -31,37 +30,19 @@ export interface WasteReport {
 })
 export class WasteService {
   private authService = inject(AuthService);
-  private ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
   async classifyWaste(base64Image: string): Promise<{ category: string; disposalInstruction: string; recyclabilityScore: number }> {
-    const model = "gemini-3-flash-preview";
-    const prompt = "Identify the waste in this image. Categorize it as one of: plastic, organic, metal, paper, e-waste, or other. Provide a brief disposal instruction and a recyclability score (0-100). Return ONLY JSON.";
-    
-    const response = await this.ai.models.generateContent({
-      model,
-      contents: [
-        {
-          parts: [
-            { text: prompt },
-            { inlineData: { mimeType: "image/jpeg", data: base64Image } }
-          ]
-        }
-      ],
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            category: { type: Type.STRING },
-            disposalInstruction: { type: Type.STRING },
-            recyclabilityScore: { type: Type.NUMBER }
-          },
-          required: ["category", "disposalInstruction", "recyclabilityScore"]
-        }
-      }
+    const response = await fetch('/api/classify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: base64Image })
     });
 
-    return JSON.parse(response.text || '{}');
+    if (!response.ok) {
+      throw new Error('Classification failed');
+    }
+
+    return await response.json();
   }
 
   async submitReport(base64Image: string, classification: { category: string; disposalInstruction: string }, location: { lat: number; lng: number }) {

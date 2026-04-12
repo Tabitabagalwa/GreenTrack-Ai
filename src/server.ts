@@ -6,11 +6,62 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import {join} from 'node:path';
+import { GoogleGenAI, SchemaType } from "@google/genai";
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
+app.use(express.json({ limit: '10mb' }));
 const angularApp = new AngularNodeAppEngine();
+
+const genAI = new GoogleGenAI(process.env['GEMINI_API_KEY'] || '');
+
+/**
+ * API Endpoint for Waste Classification
+ * This keeps the API key secure on the server.
+ */
+app.post('/api/classify', async (req, res) => {
+  try {
+    const { image } = req.body;
+    if (!image) {
+      return res.status(400).json({ error: 'Image is required' });
+    }
+
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: SchemaType.OBJECT,
+          properties: {
+            category: { type: SchemaType.STRING },
+            disposalInstruction: { type: SchemaType.STRING },
+            recyclabilityScore: { type: SchemaType.NUMBER }
+          },
+          required: ["category", "disposalInstruction", "recyclabilityScore"]
+        }
+      }
+    });
+
+    const prompt = "Identify the waste in this image. Categorize it as one of: plastic, organic, metal, paper, e-waste, or other. Provide a brief disposal instruction and a recyclability score (0-100). Return ONLY JSON.";
+
+    const result = await model.generateContent([
+      prompt,
+      {
+        inlineData: {
+          mimeType: "image/jpeg",
+          data: image
+        }
+      }
+    ]);
+
+    const responseText = result.response.text();
+    res.json(JSON.parse(responseText));
+  } catch (error) {
+    console.error('Classification error:', error);
+    res.status(500).json({ error: 'Failed to classify image' });
+  }
+});
 
 /**
  * Example Express Rest API endpoints can be defined here.
