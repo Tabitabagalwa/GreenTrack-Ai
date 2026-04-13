@@ -59,7 +59,7 @@ export class AuthService {
   }
 
   private async syncProfile(user: FirebaseUser) {
-    const userRef = doc(db, 'users', user.uid);
+    const userRef = doc(db, 'gt_users', user.uid);
     const userSnap = await getDoc(userRef);
 
     if (!userSnap.exists()) {
@@ -85,7 +85,7 @@ export class AuthService {
     if (currentProfile) {
       const newPoints = currentProfile.points + amount;
       const newLevel = Math.floor(newPoints / 100) + 1;
-      const userRef = doc(db, 'users', currentProfile.uid);
+      const userRef = doc(db, 'gt_users', currentProfile.uid);
       
       const updates = {
         points: newPoints,

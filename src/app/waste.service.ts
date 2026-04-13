@@ -68,7 +68,7 @@ export class WasteService {
       timestamp: serverTimestamp()
     };
 
-    const docRef = await addDoc(collection(db, 'reports'), report);
+    const docRef = await addDoc(collection(db, 'gt_reports'), report);
     
     // 3. Award points to user
     await this.authService.addPoints(10);
@@ -77,7 +77,7 @@ export class WasteService {
   }
 
   getReports(callback: (reports: WasteReport[]) => void) {
-    const q = query(collection(db, 'reports'), orderBy('timestamp', 'desc'));
+    const q = query(collection(db, 'gt_reports'), orderBy('timestamp', 'desc'));
     return onSnapshot(q, (snapshot) => {
       const reports = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as WasteReport));
       callback(reports);

@@ -1,10 +1,10 @@
 {
-  "projectId": "gen-lang-client-0493206872",
-  "appId": "1:1036451867338:web:c71c8368d878bbb8386233",
-  "apiKey": "AIzaSyAuV8oEObqCwjnAXO5eEU5H7bVuIr6IfbI",
-  "authDomain": "gen-lang-client-0493206872.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-33a21586-6027-4a03-81e2-b0f21e802ef9",
-  "storageBucket": "gen-lang-client-0493206872.firebasestorage.app",
-  "messagingSenderId": "1036451867338",
+  "projectId": "sauticonnect-948dk",
+  "appId": "1:1037185356628:web:31dbef10ea5d9fedaeaec1",
+  "apiKey": "AIzaSyD8gK9tqDtNs2f_U4lSd4x59d1i-Ewz7nM",
+  "authDomain": "sauticonnect-948dk.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "sauticonnect-948dk.firebasestorage.app",
+  "messagingSenderId": "1037185356628",
   "measurementId": ""
 }

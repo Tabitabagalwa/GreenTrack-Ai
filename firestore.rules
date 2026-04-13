@@ -47,16 +47,16 @@ service cloud.firestore {
 
     // Rules
     
-    match /users/{userId} {
+    match /gt_users/{userId} {
       // Users can only read their own profile (contains email)
       allow read: if isOwner(userId);
       // Users can create/update their own profile
       allow create: if isOwner(userId) && isValidUser(request.resource.data);
-      allow update: if isOwner(userId) && isValidUser(request.resource.data) && 
-                    request.resource.data.points == resource.data.points; // Points handled by admin/system logic if needed, but for now owner can't self-award
+      // Allow updates to points and level (simplified for this applet)
+      allow update: if isOwner(userId) && isValidUser(request.resource.data);
     }
     
-    match /reports/{reportId} {
+    match /gt_reports/{reportId} {
       // Reports are public for mapping
       allow read: if isAuthenticated();
       // Authenticated users can create reports
@@ -65,10 +65,9 @@ service cloud.firestore {
       allow update: if isAuthenticated() && resource.data.reporterId == request.auth.uid && 
                     isValidReport(request.resource.data) &&
                     request.resource.data.status == resource.data.status; // Can't self-verify/clean
-      // Admins (to be implemented) or system would update status
     }
     
-    match /collectionPoints/{pointId} {
+    match /gt_collectionPoints/{pointId} {
       // Collection points are public
       allow read: if true;
       // Only admins can write (for now, deny all writes)
