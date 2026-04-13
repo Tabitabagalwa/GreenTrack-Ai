@@ -28,14 +28,61 @@
             <mat-icon>logout</mat-icon>
           </button>
         } @else {
-          <button (click)="authService.login()" class="flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-slate-800 active:scale-95">
+          <button (click)="toggleLogin()" class="flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-slate-800 active:scale-95">
             <mat-icon class="scale-90">login</mat-icon>
-            Sign In
+            Connexion
           </button>
         }
       </div>
     </div>
   </nav>
+
+  <!-- Login Modal -->
+  @if (showLoginModal()) {
+    <div class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+      <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+        <div class="mb-6 flex items-center justify-between">
+          <h2 class="text-xl font-bold">Connexion sans mot de passe</h2>
+          <button (click)="toggleLogin()" class="text-slate-400 hover:text-slate-600">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <p class="mb-6 text-sm text-slate-600">Entrez votre e-mail et nous vous enverrons un lien magique pour vous connecter instantanément.</p>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Adresse E-mail</label>
+            <input 
+              type="email" 
+              [(ngModel)]="email" 
+              placeholder="votre@email.com"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-all focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            >
+          </div>
+          <button 
+            (click)="onSendLink()"
+            [disabled]="!email()"
+            class="w-full rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white transition-all hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50"
+          >
+            Envoyer le lien magique
+          </button>
+          
+          <div class="relative py-4">
+            <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-100"></div></div>
+            <div class="relative flex justify-center text-xs uppercase"><span class="bg-white px-2 text-slate-400">Ou continuer avec</span></div>
+          </div>
+          
+          <button 
+            (click)="authService.login(); toggleLogin()"
+            class="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white py-3 text-sm font-semibold transition-all hover:bg-slate-50 active:scale-[0.98]"
+          >
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="h-5 w-5" alt="Google">
+            Google
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 
   <!-- Main Content -->
   <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
